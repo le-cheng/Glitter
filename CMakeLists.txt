@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.29)
 project(Glitter)
 
 option(GLFW_BUILD_DOCS OFF)
-option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
+option(GLFW_BUILD_EXAMPLES OFF)
 add_subdirectory(Glitter/Vendor/glfw)
 
 option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
@@ -11,19 +11,22 @@ option(ASSIMP_BUILD_SAMPLES OFF)
 option(ASSIMP_BUILD_TESTS OFF)
 add_subdirectory(Glitter/Vendor/assimp)
 
-option(BUILD_BULLET2_DEMOS OFF)
-option(BUILD_CPU_DEMOS OFF)
+# Bullet: Physics
 option(BUILD_EXTRAS OFF)
-option(BUILD_OPENGL3_DEMOS OFF)
+option(BUILD_CPU_DEMOS OFF)
 option(BUILD_UNIT_TESTS OFF)
+option(BUILD_BULLET2_DEMOS OFF)
+option(BUILD_OPENGL3_DEMOS OFF)
 add_subdirectory(Glitter/Vendor/bullet)
 
-if(MSVC)
+
+
+if(MSVC) # 使用Microsoft Visual C++ (MSVC) 编译器时
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
-    if(NOT WIN32)
-        set(GLAD_LIBRARIES dl)
+    if(NOT WIN32) # WIN32代表Windows系统
+        set(GLAD_LIBRARIES dl) # dl 库通常在Unix-like系统（如Linux或macOS）上用于动态链接，提供dlopen等函数，允许在运行时加载动态链接库。
     endif()
 endif()
 
@@ -42,6 +45,11 @@ file(GLOB PROJECT_SHADERS Glitter/Shaders/*.comp
                           Glitter/Shaders/*.frag
                           Glitter/Shaders/*.geom
                           Glitter/Shaders/*.vert)
+#   将收集Glitter/Shaders/目录下四种类型的着色器文件：
+#   .comp（compute shader），
+#   .frag（fragment shader），
+#   .geom（geometry shader），
+#   .vert（vertex shader）
 file(GLOB PROJECT_CONFIGS CMakeLists.txt
                           Readme.md
                          .gitattributes
@@ -62,7 +70,7 @@ target_link_libraries(${PROJECT_NAME} assimp glfw
                       ${GLFW_LIBRARIES} ${GLAD_LIBRARIES}
                       BulletDynamics BulletCollision LinearMath)
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
