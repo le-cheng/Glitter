@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.27)
 project(Glitter)
 
 option(GLFW_BUILD_DOCS OFF)
@@ -40,7 +40,7 @@ include_directories(Glitter/Headers/
 
 file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c)
 file(GLOB PROJECT_HEADERS Glitter/Headers/*.hpp)
-file(GLOB PROJECT_SOURCES 
+file(GLOB PROJECT_SOURCES
                         Glitter/Sources/b_triangle.cpp
                       # Glitter/Sources/c_Wireframe.cpp
         )
