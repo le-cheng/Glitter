@@ -22,3 +22,9 @@
     path = Glitter/Vendor/bullet
     url = https://github.com/bulletphysics/bullet3.git
     branch = master
+[submodule "GlitterVendor"]
+	path = GlitterVendor
+	url = git@github.com:ocornut/imgui.git
+[submodule "Glitter/Vendor/imgui"]
+	path = Glitter/Vendor/imgui
+	url = git@github.com:ocornut/imgui.git

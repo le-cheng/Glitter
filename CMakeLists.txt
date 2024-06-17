@@ -36,14 +36,13 @@ include_directories(Glitter/Headers/
                     Glitter/Vendor/glad/include/
                     Glitter/Vendor/glfw/include/
                     Glitter/Vendor/glm/
-                    Glitter/Vendor/stb/)
+                    Glitter/Vendor/stb/
+                    Glitter/Utils/)
 
 file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c)
-file(GLOB PROJECT_HEADERS Glitter/Headers/*.hpp)
-file(GLOB PROJECT_SOURCES
-                        Glitter/Sources/b_triangle.cpp
-                      # Glitter/Sources/c_Wireframe.cpp
-        )
+file(GLOB PROJECT_HEADERS Glitter/Headers/*.hpp
+                          Glitter/Headers/*.h)
+file(GLOB PROJECT_SOURCES Glitter/Sources/*.cpp)
 file(GLOB PROJECT_SHADERS Glitter/Shaders/*.comp
                           Glitter/Shaders/*.frag
                           Glitter/Shaders/*.geom
@@ -58,6 +57,7 @@ file(GLOB PROJECT_CONFIGS CMakeLists.txt
                          .gitattributes
                          .gitignore
                          .gitmodules)
+file(GLOB PROJECT_UTILS Glitter/Utils/*.cpp)
 
 source_group("Headers" FILES ${PROJECT_HEADERS})
 source_group("Shaders" FILES ${PROJECT_SHADERS})
@@ -66,16 +66,25 @@ source_group("Vendors" FILES ${VENDORS_SOURCES})
 
 add_definitions(-DGLFW_INCLUDE_NONE
                 -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
-                               ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
-                               ${VENDORS_SOURCES})
-target_link_libraries(${PROJECT_NAME} assimp glfw
-                      ${GLFW_LIBRARIES} ${GLAD_LIBRARIES}
-                      BulletDynamics BulletCollision LinearMath)
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 
-add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Glitter/Shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    DEPENDS ${PROJECT_SHADERS})
+foreach(src ${PROJECT_SOURCES})
+    get_filename_component(filename ${src} NAME_WE)
+    add_executable(${filename} ${src} 
+                    ${PROJECT_HEADERS}
+                    ${PROJECT_SHADERS} 
+                    ${PROJECT_CONFIGS}
+                    ${VENDORS_SOURCES}
+                    ${PROJECT_UTILS})
+    target_link_libraries(${filename} 
+                          assimp glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} BulletDynamics BulletCollision LinearMath)
+    set_target_properties(${filename} PROPERTIES
+                          RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+endforeach()
+
+# copy resources to out directory
+file(GLOB resource_files Glitter/Shaders/*.fs
+                         Glitter/Shaders/*.vs
+                         Glitter/Images/*.jpg
+                         Glitter/Images/*.png)
+
+file(COPY ${resource_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/out/resources/)

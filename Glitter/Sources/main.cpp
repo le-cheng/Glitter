@@ -18,6 +18,8 @@ void processInput(GLFWwindow *window)
 }
 
 int main(int argc, char * argv[]) {
+    (void)argc;
+    (void)argv;
 
     // Load GLFW and Create a Window
     glfwInit();
@@ -26,16 +28,18 @@ int main(int argc, char * argv[]) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
 
-    // Check for Valid Context
+    auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
     if (mWindow == nullptr) {
         fprintf(stderr, "Failed to Create OpenGL Context");
+        glfwTerminate();
         return EXIT_FAILURE;
     }
 
     // Create Context and Load OpenGL Functions
     glfwMakeContextCurrent(mWindow);
+
+    // 初始化GLAD
     // if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     // {
     //     std::cout << "Failed to initialize GLAD" << std::endl;

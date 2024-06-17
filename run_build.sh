@@ -19,13 +19,6 @@ cmake -G "MinGW Makefiles" ..
 # 使用MinGW编译项目
 mingw32-make -j8
 
-
-bin_file = ./out/Glitter.exe
-
-if [ -f $bin_file ]; then
-    ./out/Glitter.exe
-else
-    echo "File does not exist. Warning!"
-fi
+# ./out/main.exe
 
 echo "run completed."
