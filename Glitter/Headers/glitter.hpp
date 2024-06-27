@@ -17,6 +17,10 @@
 // Reference: https://learnopengl.com/code_viewer_gh.php?code=includes/learnopengl/shader_s.h
 #include "shader_s.h"
 
+// Camera Class
+// Reference: https://learnopengl.com/code_viewer_gh.php?code=includes/learnopengl/camera.h
+#include "camera.h"
+
 // Reference: https://github.com/nothings/stb/blob/master/stb_image.h#L4
 // To use stb_image, add this in *one* C++ source file.
 // #define STB_IMAGE_IMPLEMENTATION

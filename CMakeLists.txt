@@ -1,10 +1,17 @@
 cmake_minimum_required(VERSION 3.27)
 project(Glitter)
 
-option(GLFW_BUILD_DOCS OFF)
-option(GLFW_BUILD_TESTS OFF)
-option(GLFW_BUILD_EXAMPLES OFF)
-add_subdirectory(Glitter/Vendor/glfw)
+# 查找预编译库
+find_library(EXISTING_GLEW glfw3 PATHS Prebuilts/glfw-3.4.bin.WIN64/lib-mingw-w64/)
+
+if(NOT EXISTING_GLEW)
+    message(STATUS "Compiling library from source ${EXISTING_GLEW}")
+
+    option(GLFW_BUILD_DOCS OFF)
+    option(GLFW_BUILD_TESTS OFF)
+    option(GLFW_BUILD_EXAMPLES OFF)
+    add_subdirectory(Glitter/Vendor/glfw)
+endif()
 
 option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 option(ASSIMP_BUILD_SAMPLES OFF)
@@ -18,7 +25,6 @@ option(BUILD_UNIT_TESTS OFF)
 option(BUILD_BULLET2_DEMOS OFF)
 option(BUILD_OPENGL3_DEMOS OFF)
 add_subdirectory(Glitter/Vendor/bullet)
-
 
 
 if(MSVC) # 使用Microsoft Visual C++ (MSVC) 编译器时
@@ -37,7 +43,10 @@ include_directories(Glitter/Headers/
                     Glitter/Vendor/glfw/include/
                     Glitter/Vendor/glm/
                     Glitter/Vendor/stb/
-                    Glitter/Utils/)
+                    Glitter/Utils/
+                    Glitter/Vendor/imgui/
+                    Glitter/Vendor/imgui/backends/
+                )
 
 file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c)
 file(GLOB PROJECT_HEADERS Glitter/Headers/*.hpp
@@ -58,6 +67,10 @@ file(GLOB PROJECT_CONFIGS CMakeLists.txt
                          .gitignore
                          .gitmodules)
 file(GLOB PROJECT_UTILS Glitter/Utils/*.cpp)
+file(GLOB PROJECT_IMGUI Glitter/Vendor/imgui/backends/imgui_impl_glfw.cpp
+                        Glitter/Vendor/imgui/backends/imgui_impl_opengl3.cpp
+                        Glitter/Vendor/imgui/*.cpp
+                        Glitter/Vendor/imgui/*.h)
 
 source_group("Headers" FILES ${PROJECT_HEADERS})
 source_group("Shaders" FILES ${PROJECT_SHADERS})
@@ -69,14 +82,32 @@ add_definitions(-DGLFW_INCLUDE_NONE
 
 foreach(src ${PROJECT_SOURCES})
     get_filename_component(filename ${src} NAME_WE)
-    add_executable(${filename} ${src} 
+    add_executable(${filename} ${src}
                     ${PROJECT_HEADERS}
-                    ${PROJECT_SHADERS} 
+                    ${PROJECT_SHADERS}
                     ${PROJECT_CONFIGS}
                     ${VENDORS_SOURCES}
-                    ${PROJECT_UTILS})
-    target_link_libraries(${filename} 
-                          assimp glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} BulletDynamics BulletCollision LinearMath)
+                    ${PROJECT_UTILS}
+                    ${PROJECT_IMGUI})
+    if(EXISTING_GLEW)
+        target_link_libraries(${filename}
+                            assimp 
+                            ${GLAD_LIBRARIES} 
+                            BulletDynamics 
+                            BulletCollision 
+                            LinearMath 
+                            ${EXISTING_GLEW})
+    else()
+        message(STATUS "Compiling library from source")
+        target_link_libraries(${filename}
+                                assimp 
+                                glfw ${GLFW_LIBRARIES} 
+                                ${GLAD_LIBRARIES} 
+                                BulletDynamics 
+                                BulletCollision 
+                                LinearMath)
+    endif()
+    
     set_target_properties(${filename} PROPERTIES
                           RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 endforeach()

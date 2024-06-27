@@ -8,6 +8,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+// imgui
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 // Standard Headers
 #include <cstdio>
 #include <cstdlib>
@@ -210,6 +215,33 @@ int main()
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
+    // imgui
+    //设置330版本给imgui使用
+    const char* glsl_version = "#version 330";
+
+    // build and compile our shader zprogram
+    //在上面配置初始化完成后再进行界面的引入
+    //创建imgui的上下文
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+    // 设置样式
+    ImGui::StyleColorsDark();
+    //设置平台和渲染器
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+    float fov = 45.0f;
+    float aspect = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+    float near_cp = 0.1f;
+    float far_cp = 100.0f;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    float view_x = 0.0f;
+    float view_y = 0.0f;
+    float view_z = -3.0f;
+
+
 
     // render loop
     // -----------
@@ -219,9 +251,30 @@ int main()
         // -----
         processInput(window);
 
+        // ---------------使用imgui创建窗口---------------
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("info");
+        ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::SliderFloat("fov", &fov, 0.1f, 179.9f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::SliderFloat("aspect", &aspect, 0.1f, 10.0f);
+        ImGui::SliderFloat("near_cp", &near_cp, 0.1f, 100.0f);
+        ImGui::SliderFloat("far_cp", &far_cp, 0.1f, 200.0f);
+        ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        ImGui::End();
+
+        ImGui::Begin("view");
+        ImGui::SliderFloat("view_x", &view_x, -2.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::SliderFloat("view_y", &view_y, -2.0f, 2.0f);
+        ImGui::SliderFloat("view_z", &view_z, -12.0f, 12.0f);
+        ImGui::End();
+
+
         // render
         // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);//0.2f, 0.3f, 0.3f, 1.0f
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // bind textures on corresponding texture units
@@ -236,8 +289,8 @@ int main()
 
         glm::mat4 view          = glm::mat4(1.0f);
         glm::mat4 projection    = glm::mat4(1.0f);
-        view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        view  = glm::translate(view, glm::vec3(view_x, view_y, view_z));
+        projection = glm::perspective(glm::radians(fov), aspect, near_cp, far_cp);
 
 
         glm::mat4 VP = projection * view;
@@ -247,7 +300,7 @@ int main()
 
         // render boxes
         glBindVertexArray(VAO);
-        
+
         for (unsigned int i = 0; i < 10; i++)
         {
             // calculate the model matrix for each object and pass it to shader before drawing
@@ -261,7 +314,9 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-
+        // ---------------imgui渲染---------------
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -274,6 +329,7 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
