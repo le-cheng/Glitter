@@ -16,23 +16,22 @@ endif()
 option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 option(ASSIMP_BUILD_SAMPLES OFF)
 option(ASSIMP_BUILD_TESTS OFF)
+option(ASSIMP_WARNINGS_AS_ERRORS OFF)
 add_subdirectory(Glitter/Vendor/assimp)
 
-# Bullet: Physics
-option(BUILD_EXTRAS OFF)
-option(BUILD_CPU_DEMOS OFF)
-option(BUILD_UNIT_TESTS OFF)
 option(BUILD_BULLET2_DEMOS OFF)
+option(BUILD_CPU_DEMOS OFF)
+option(BUILD_EXTRAS OFF)
 option(BUILD_OPENGL3_DEMOS OFF)
+option(BUILD_UNIT_TESTS OFF)
 add_subdirectory(Glitter/Vendor/bullet)
 
-
-if(MSVC) # 使用Microsoft Visual C++ (MSVC) 编译器时
+if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
-    if(NOT WIN32) # WIN32代表Windows系统
-        set(GLAD_LIBRARIES dl) # dl 库通常在Unix-like系统（如Linux或macOS）上用于动态链接，提供dlopen等函数，允许在运行时加载动态链接库。
+    if(NOT WIN32)
+        set(GLAD_LIBRARIES dl)
     endif()
 endif()
 
@@ -91,7 +90,7 @@ foreach(src ${PROJECT_SOURCES})
                     ${PROJECT_IMGUI})
     if(EXISTING_GLEW)
         target_link_libraries(${filename}
-                            assimp 
+                            assimp
                             ${GLAD_LIBRARIES} 
                             BulletDynamics 
                             BulletCollision 
@@ -100,7 +99,7 @@ foreach(src ${PROJECT_SOURCES})
     else()
         message(STATUS "Compiling library from source")
         target_link_libraries(${filename}
-                                assimp 
+                                assimp
                                 glfw ${GLFW_LIBRARIES} 
                                 ${GLAD_LIBRARIES} 
                                 BulletDynamics 
